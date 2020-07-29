@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Prueba de ajax</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk"
+	 crossorigin="anonymous">
+
+	<style>
+		.hide {
+			display: none !important;
+		}
+	</style>
+</head>
+
+<body>
+
+	<div class="container">
+		<h1>App</h1>
+		<hr>
+		<button id="init" type="button" class="btn btn-primary btn-lg btn-block">Inciar aplicacion</button>
+        <div id="spinner" class="spinner-grow text-primary hide"></div>
+        <form id="form" class="hide">
+            <div class="form-group">
+                <label for="select_marcas">Marcas</label>
+                <select id="select_marcas" class="custom-select"></select>
+            </div>
+            <div class="form-group">
+                <label for="select_modelos">Modelos</label>
+                <select id="select_modelos" class="custom-select"></select>
+                <small class="form-text text-muted">Debes elegir una marca para continuar.</small>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+
+    <script>
+        // Config
+        const BASE_URL = 'https://memorableoddballprotools--gonzalograssi1.repl.co';
+
+        // Form elements
+        let form = document.getElementById('form');
+        let select_marcas = document.getElementById('select_marcas');
+        let select_modelos = document.getElementById('select_modelos');
+
+        // Others elements
+        let init_btn = document.getElementById('init');
+        let spinner = document.getElementById('spinner');
+        
+        // Init button on click
+        init_btn.addEventListener('click', () => {
+            init_btn.classList.add("hide");
+            spinner.classList.remove("hide");
+
+            fetch(`${BASE_URL}/marcas`)
+                .then(response => response.json())
+                .then(marcas => {
+                    let html = '';
+                    marcas.splice(0, 0, {
+                        id: 0,
+                        nombre: 'Seleccione una marca',
+                    });
+                    for (const marca of marcas) {
+                        html += `<option value="${marca.nombre}">${marca.nombre}</option>`
+                    }
+                    select_marcas.innerHTML = html;
+                    form.classList.remove('hide');
+                    spinner.classList.add("hide");
+                })
+                .catch(e => {
+                    console.error(e);
+                })
+        })
+
+        // Select on change
+        select_marcas.addEventListener('change', (event) => {
+            let marca_seleccionada = event.target.value;
+
+            if (marca_seleccionada === 'Seleccione una marca') {
+                select_modelos.innerHTML = `<option>Seleccione una marca</option>`;
+                return;
+            }
+
+            fetch(`${BASE_URL}/marcas/${marca_seleccionada}/modelos`)
+                .then(response => response.json())
+                .then(modelos => {
+                    let html = '';
+                    modelos.splice(0, 0, {
+                        nombre: 'Seleccione un modelo'
+                    });
+                    for (const modelo of modelos) {
+                        html += `<option value="${modelo.nombre}">${modelo.nombre}</option>`
+                    }
+                    select_modelos.innerHTML = html;
+                })
+        })
+
+    </script>
+</body>
+
+</html>
